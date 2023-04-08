@@ -1,13 +1,13 @@
 #include"fairShareSched.h"
 
 void freeMem(QNode *q){
-    while(q){
-        free(q->job);
+    QNode *temp;
+    while(q!=NULL){
+        temp=q;
         q=q->next;
-    }
-    while(q){
-        QNode* next=q->next;
-        free(q);
-        q=next;
+        free(temp->job->cpu);
+        free(temp->job->io);
+        free(temp->job);
+        free(temp);
     }
 }
