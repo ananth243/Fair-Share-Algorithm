@@ -44,7 +44,12 @@ QNode*executeJob(QNode *q, QNode* node, int *currentTime, int timeSlice, int pre
     /*
     TODO: Is it random for one instance of CPU bursts i.e. in the beginning or for all executions?
     */
-    int execution = (((rand()%(UPPER-LOWER+1))+LOWER)* node->job->cpu[node->job->cpuIndex])/100;
+    int execution = node->job->cpu[node->job->cpuIndex];
+    srand(time(NULL));
+    int rand1 = (rand() % 4000);
+    double rand2 = rand1/10000.0; 
+    rand2 += 0.6;
+    execution = (int)((double) execution * rand2); 
     if(execution <= timeSlice){
         node->job->cpu[node->job->cpuIndex]=0;
         node->job->cpuIndex++;
