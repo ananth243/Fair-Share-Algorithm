@@ -5,8 +5,11 @@ This repository contains C code implementation for the Fair Share Scheduler
 This file contains the jobs that are to be scheduled
 First line represents the number of jobs to be scheduled
 Each job has 3 lines
+<br/>
 First line: Group id, Base Priority, Arrival Time, Number Of CPU Bursts
+<br/>
 Second line: The array Worst Case CPU bursts
+<br/>
 Third Line: The array of I/O bursts
 
 ## Note
