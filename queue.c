@@ -25,6 +25,9 @@ void printQueue(QNode* q){
 }
 
 QNode* deleteQueue(QNode *head, QNode* node){
+    free(node->job->cpu);
+    free(node->job->io);
+    free(node->job);
     QNode *prev=NULL,*newHead=head;
     while(head){
         if(head==node){
@@ -39,6 +42,7 @@ QNode* deleteQueue(QNode *head, QNode* node){
         prev=head;
         head=head->next;
     }
+    free(node);
 }
 
 bool isEmptyQueue(QNode *q){

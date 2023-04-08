@@ -50,15 +50,8 @@ QNode*executeJob(QNode *q, QNode* node, int *currentTime, int timeSlice, int pre
         node->job->cpuIndex++;
         increaseGroupCount(q, node->job->gid, execution, *currentTime);
         *currentTime+=execution;
-        if(node->job->cpuIndex==node->job->bursts){
+        if(node->job->cpuIndex==node->job->bursts)
             q=deleteQueue(q,node);
-            //!TODO: The following code should free memory once job finished but throws segmentation fault
-            // node->next=NULL;
-            // free(node->job->cpu);
-            // free(node->job->io);
-            // free(node->job);
-            // free(node);
-        }
         else{
             node->job->arrivalTime = *currentTime+ node->job->io[node->job->ioIndex];
             printf("Time %d: Job %d gone for I/O. Will be back at %d\n",*currentTime,node->job->jid, node->job->arrivalTime);
@@ -74,14 +67,12 @@ QNode*executeJob(QNode *q, QNode* node, int *currentTime, int timeSlice, int pre
         node->job->cpu[node->job->cpuIndex]-=timeSlice;
         increaseGroupCount(q, node->job->gid, execution, *currentTime);
         *currentTime+=execution;
-        // node->job->arrivalTime = *currentTime;
         node->job->cpuCount+=execution;
     }
     int groups = getNumberOfGroups(q, prevDecisionPoint);
     QNode* temp=q;
     while(q){
-        if(q->job->arrivalTime<=prevDecisionPoint)
-            calculatePriority(q, groups);
+        if(q->job->arrivalTime<=prevDecisionPoint) calculatePriority(q, groups);
         q=q->next;
     }
     return temp;
