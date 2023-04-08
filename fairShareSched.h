@@ -4,11 +4,16 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<stdbool.h>
+#include<time.h>
+
+
 #define INT_MAX 2147483647
 #define INT_MIN -2147483648
 # define forn(k,n) for(int i=k;i<n;i++)
+#define UPPER 100
+#define LOWER 60
 
-// Job definitons
+// Job definiton
 typedef struct{
     int jid; // Job ID
     int gid; // Group ID
@@ -39,9 +44,10 @@ void insertQueue(QNode *head, Job *job);
 
 void printQueue(QNode* q);
 
-QNode* deleteQueue(QNode *head, Job *job);
+QNode* deleteQueue(QNode *head, QNode* node);
 
 bool isEmptyQueue(QNode* q);
+
 
 // Job executions
 QNode* pickAJobToExecute(QNode* q, int currentTime);
@@ -52,12 +58,20 @@ void calculatePriority(QNode* node, int groups);
 
 int findNextJob(QNode *q);
 
-void freeMem(QNode *q);
+int findNextJob(QNode* q);
+
+void increaseGroupCount(QNode *q, int gid, int execution, int currentTime);
+
+void calculatePriority(QNode *node, int groups);
+
+int getNumberOfGroups(QNode* q, int currentTime);
+
+void equateGroupCount(QNode *q, QNode* node);
 
 void groupCountFunction(QNode*q, int currentTime);
 
-// Set declarations
 
+// Set declarations
 struct Group{
     int gid;
     struct Group* next;
