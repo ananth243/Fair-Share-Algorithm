@@ -16,6 +16,10 @@ int main(int argc, char *argv[]){
     }
     srand(time(0));
     int timeSlice = atoi(argv[2]);
+    if(timeSlice==0){
+        printf("Error: Time Slice entered is invalid\n");
+        return 1;
+    }
     int n;
     fscanf(fp,"%d",&n);
     QNode *q=NULL;
@@ -38,10 +42,12 @@ int main(int argc, char *argv[]){
         job->io = malloc(sizeof(int)*bursts);
         job->wentForIO=false;
         for(int i=0;i<bursts;i++) fscanf(fp,"%d",&job->cpu[i]);
+        for(int i=0;i<bursts;i++) job->cpu[i]=(((rand()%(UPPER-LOWER+1))+LOWER)* job->cpu[job->cpuIndex])/100;
         for(int i=0;i<bursts;i++) fscanf(fp,"%d",&job->io[i]);
         if(i==0) q = initQueue(job); 
         else insertQueue(q,job);
     }
+    fclose(fp);
     int time=0,prevDecisionPoint=0;
     while(q){
         QNode* node = pickAJobToExecute(q, time);
@@ -58,6 +64,5 @@ int main(int argc, char *argv[]){
         prevDecisionPoint=time;
     }
     printf("Time %d: Execution over\n",time);
-    fclose(fp);
     return 0;
 }

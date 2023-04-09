@@ -40,11 +40,10 @@ void increaseGroupCount(QNode *q, int gid, int execution, int currentTime){
 }
 
 QNode*executeJob(QNode *q, QNode* node, int *currentTime, int timeSlice, int prevDecisionPoint){
-    // int execution = node->job->cpu[node->job->cpuIndex]; // For debugging
+    int execution = node->job->cpu[node->job->cpuIndex]; // For debugging
     /*
     TODO: Is it random for one instance of CPU bursts i.e. in the beginning or for all executions?
     */
-    int execution = (((rand()%(UPPER-LOWER+1))+LOWER)* node->job->cpu[node->job->cpuIndex])/100;
     if(execution <= timeSlice){
         node->job->cpu[node->job->cpuIndex]=0;
         node->job->cpuIndex++;
