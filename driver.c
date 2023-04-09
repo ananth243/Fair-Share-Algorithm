@@ -1,68 +1,83 @@
-#include"fairShareSched.h"
+#include "fairShareSched.h"
 
-int main(int argc, char *argv[]){
-    if(argc==1){
+int main(int argc, char *argv[])
+{
+    if (argc == 1)
+    {
         printf("Invalid Arguments\n");
         return 1;
     }
-    FILE* fp = fopen(argv[1],"r");
-    if(fp==NULL){
+    FILE *fp = fopen(argv[1], "r");
+    if (fp == NULL)
+    {
         printf("File doesn't exist\n");
         return 1;
     }
-    if(argc==2){
+    if (argc == 2)
+    {
         printf("Error: Time slice not defined\n");
         return 1;
     }
     srand(time(0));
     int timeSlice = atoi(argv[2]);
-    if(timeSlice==0){
+    if (timeSlice == 0)
+    {
         printf("Error: Time Slice entered is invalid\n");
         return 1;
     }
     int n;
-    fscanf(fp,"%d",&n);
-    QNode *q=NULL;
-    int totalExecutionTime=0;
-    forn(0,n){
+    fscanf(fp, "%d", &n);
+    QNode *q = NULL;
+    int totalExecutionTime = 0;
+    forn(0, n)
+    {
         Job *job = (Job *)malloc(sizeof(Job));
-        fscanf(fp,"%d",&job->gid);
-        fscanf(fp,"%d",&job->basePriority);
-        job->calculatedPriority=job->basePriority;
-        job->jid=i+1;
-        fscanf(fp,"%d",&job->arrivalTime);
+        fscanf(fp, "%d", &job->gid);
+        fscanf(fp, "%d", &job->basePriority);
+        job->calculatedPriority = job->basePriority;
+        job->jid = i + 1;
+        fscanf(fp, "%d", &job->arrivalTime);
         int bursts;
-        fscanf(fp,"%d",&bursts);
-        job->bursts=bursts;
-        job->ioIndex=0;
-        job->cpuIndex=0;
-        job->groupCount=0;
-        job->cpuCount=0;
-        job->cpu = malloc(sizeof(int)*bursts);
-        job->io = malloc(sizeof(int)*bursts);
-        job->wentForIO=false;
-        for(int i=0;i<bursts;i++) fscanf(fp,"%d",&job->cpu[i]);
-        for(int i=0;i<bursts;i++) job->cpu[i]=(((rand()%(UPPER-LOWER+1))+LOWER)* job->cpu[job->cpuIndex])/100;
-        for(int i=0;i<bursts;i++) fscanf(fp,"%d",&job->io[i]);
-        if(i==0) q = initQueue(job); 
-        else insertQueue(q,job);
+        fscanf(fp, "%d", &bursts);
+        job->bursts = bursts;
+        job->ioIndex = 0;
+        job->cpuIndex = 0;
+        job->groupCount = 0;
+        job->cpuCount = 0;
+        job->cpu = malloc(sizeof(int) * bursts);
+        job->io = malloc(sizeof(int) * bursts);
+        job->wentForIO = false;
+        for (int i = 0; i < bursts; i++)
+            fscanf(fp, "%d", &job->cpu[i]);
+        for (int i = 0; i < bursts; i++)
+            job->cpu[i] = (((rand() % (UPPER - LOWER + 1)) + LOWER) * job->cpu[i]) / 100;
+        for (int i = 0; i < bursts; i++)
+            fscanf(fp, "%d", &job->io[i]);
+        if (i == 0)
+            q = initQueue(job);
+        else
+            insertQueue(q, job);
     }
     fclose(fp);
-    int time=0,prevDecisionPoint=0;
-    while(q){
-        QNode* node = pickAJobToExecute(q, time);
-        if(node==NULL){
+    int time = 0, prevDecisionPoint = 0;
+    printQueue(q);
+    while (q)
+    {
+        QNode *node = pickAJobToExecute(q, time);
+        if (node == NULL)
+        {
             int nextJobArrivalTime = findNextJob(q);
-            printf("Time %d: CPU idle\n",time);
-            time=nextJobArrivalTime;
+            printf("Time %d: CPU idle\n", time);
+            time = nextJobArrivalTime;
         }
-        else{
-            printf("Time %d: Job %d executing\n",time,node->job->jid);
-            q=executeJob(q,node, &time, timeSlice, prevDecisionPoint);
+        else
+        {
+            printf("Time %d: Job %d executing\n", time, node->job->jid);
+            q = executeJob(q, node, &time, timeSlice, prevDecisionPoint);
             groupCountFunction(q, time);
         }
-        prevDecisionPoint=time;
+        prevDecisionPoint = time;
     }
-    printf("Time %d: Execution over\n",time);
+    printf("Time %d: Execution over\n", time);
     return 0;
 }
