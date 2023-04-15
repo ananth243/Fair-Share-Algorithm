@@ -14,7 +14,7 @@ int getNumberOfGroups(QNode *q, int currentTime)
     return ans;
 }
 
-QNode *pickAJobToExecute(QNode *q, int currentTime)
+QNode* pickAJobToExecute(QNode *q, int currentTime)
 {
     QNode *ans = NULL;
     int priority = INT_MAX;
@@ -49,7 +49,7 @@ void increaseGroupCount(QNode *q, int gid, int execution, int currentTime)
 
 QNode *executeJob(QNode *q, QNode *node, int *currentTime, int timeSlice, int prevDecisionPoint)
 {
-    int execution = node->job->cpu[node->job->cpuIndex]; // For debugging
+    int execution = node->job->cpu[node->job->cpuIndex];
     if (execution <= timeSlice)
     {
         node->job->cpu[node->job->cpuIndex] = 0;

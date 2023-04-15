@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
             fscanf(fp, "%d", &job->cpu[i]);
         for (int i = 0; i < bursts; i++)
             job->cpu[i] = (((rand() % (UPPER - LOWER + 1)) + LOWER) * job->cpu[i]) / 100;
-        for (int i = 0; i < bursts; i++)
+        for (int i = 0; i < bursts - 1; i++)
             fscanf(fp, "%d", &job->io[i]);
         if (i == 0)
             q = initQueue(job);

@@ -45,27 +45,33 @@ void insertQueue(QNode *head, Job *job);
 
 void printQueue(QNode *q);
 
+// Deletes a node "node" from the queue. Returns head of queue after deletion
 QNode *deleteQueue(QNode *head, QNode *node);
 
 // Job executions
+
+// Function picks next job to execute
 QNode *pickAJobToExecute(QNode *q, int currentTime);
 
+// Returns head of queue after executing the job
 QNode *executeJob(QNode *q, QNode *node, int *currentTime, int timeSlice, int prevDecisionPoint);
 
+// Calculates priorities for all processes after execution of a job
 void calculatePriority(QNode *node, int groups);
 
+// Function finds next job to execute when CPU becomes idle and returns the arrival time of the next job
 int findNextJob(QNode *q);
 
-int findNextJob(QNode *q);
-
+// Function increases group count of any newly arrived processes
 void increaseGroupCount(QNode *q, int gid, int execution, int currentTime);
 
-void calculatePriority(QNode *node, int groups);
-
+// Function returns the number of groups present for execution for calculating priority
 int getNumberOfGroups(QNode *q, int currentTime);
 
+// Function equates the group count of all members of the current executed process
 void equateGroupCount(QNode *q, QNode *node);
 
+// Function adds group count for any newly arrived processes
 void groupCountFunction(QNode *q, int currentTime);
 
 // Set declarations

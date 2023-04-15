@@ -27,10 +27,13 @@ void printQueue(QNode *q)
         for (int i = 0; i < q->job->bursts; i++)
             printf("%d ", q->job->cpu[i]);
         printf("\n");
-        printf("IO bursts: ");
-        for (int i = 0; i < q->job->bursts; i++)
-            printf("%d ", q->job->io[i]);
-        printf("\n");
+        if (q->job->bursts - 1)
+        {
+            printf("IO bursts: ");
+            for (int i = 0; i < q->job->bursts - 1; i++)
+                printf("%d ", q->job->io[i]);
+            printf("\n");
+        }
         q = q->next;
     }
     printf("\n");

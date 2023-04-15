@@ -12,12 +12,10 @@ First line: Group id, Base Priority, Arrival Time, Number Of CPU Bursts
 <br/>
 Second line: The array Worst Case CPU bursts
 <br/>
-Third Line: The array of I/O bursts
+Third Line: The array of I/O bursts (No line if it's a CPU bound process)
 
 ## Note
-
-Number of I/O bursts SHOULD be 1 less than CPU bursts. Last I/O burst must have a value of -1 to indicate end of I/O burst. Manual checking isn't implemented as of the moment. We are assuming all jobs are successful hence -1
-
+Number of IO bursts is always assumed to be one less than number of CPU bursts
 ## Executing
 
 To run the code:
