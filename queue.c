@@ -8,7 +8,7 @@ QNode *initQueue(Job *job)
     return head;
 }
 
-void insertQueue(QNode *head, Job *job)
+void insertInQueue(QNode *head, Job *job)
 {
     while (head->next != NULL)
         head = head->next;
@@ -22,7 +22,7 @@ void printQueue(QNode *q)
 {
     while (q)
     {
-        printf("Job %d, Group ID: %d, Arrival Time: %d, Priority: %d\n", q->job->jid, q->job->gid, q->job->arrivalTime, q->job->calculatedPriority);
+        printf("Job %d, Group ID: %d, Arrival Time: %d, Priority: %d\n", q->job->jid, q->job->gid, q->job->arrivalTime,q->job->calculatedPriority);
         printf("Actual CPU bursts: ");
         for (int i = 0; i < q->job->bursts; i++)
             printf("%d ", q->job->cpu[i]);
@@ -39,7 +39,7 @@ void printQueue(QNode *q)
     printf("\n");
 }
 
-QNode *deleteQueue(QNode *head, QNode *node)
+QNode *deleteFromQueue(QNode *head, QNode *node)
 {
     free(node->job->cpu);
     free(node->job->io);

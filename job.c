@@ -1,12 +1,11 @@
 #include "fairShareSched.h"
 
-int getNumberOfGroups(QNode *q, int currentTime)
+int getNumberOfGroups(QNode *q, int prevDecisionPoint)
 {
     Set *set = initSet();
     while (q)
     {
-        if (q->job->arrivalTime <= currentTime)
-            insertInSet(set, q->job->gid);
+        if(q->job->arrivalTime <= prevDecisionPoint) insertInSet(set, q->job->gid);
         q = q->next;
     }
     int ans = set->size;
@@ -14,13 +13,15 @@ int getNumberOfGroups(QNode *q, int currentTime)
     return ans;
 }
 
-QNode* pickAJobToExecute(QNode *q, int currentTime)
+QNode *pickAJobToExecute(QNode *q)
 {
+    // printf("Picking  a job to execute\n");
+    // printQueue(q);
     QNode *ans = NULL;
     int priority = INT_MAX;
     while (q)
     {
-        if (q->job->arrivalTime <= currentTime && q->job->calculatedPriority < priority)
+        if (q->job->calculatedPriority < priority)
         {
             priority = q->job->calculatedPriority;
             ans = q;
@@ -37,27 +38,129 @@ void calculatePriority(QNode *node, int groups)
     node->job->calculatedPriority = node->job->basePriority + (int)(node->job->cpuCount / 2) + (int)(node->job->groupCount * groups / 4);
 }
 
-void increaseGroupCount(QNode *q, int gid, int execution, int currentTime)
+void increaseGroupCount(QNode *q, int gid, int execution)
 {
     while (q)
     {
-        if (q->job->gid == gid && q->job->arrivalTime <= currentTime)
+        if (q->job->gid == gid)
             q->job->groupCount += execution;
         q = q->next;
     }
 }
 
-QNode *executeJob(QNode *q, QNode *node, int *currentTime, int timeSlice, int prevDecisionPoint)
+RES transferToReadyQueue(QNode *q, QNode *wq, int currentTime)
 {
+    RES res;
+    res.wq = wq;
+    res.q = q;
+    // printf("\n\n Transfer to Ready Queue start\n\n");
+    // printQueue(res.q);
+    // printQueue(res.wq);
+    QNode *prev = NULL, *temp = q;
+    while (temp && temp->next)
+        temp = temp->next;
+    // Remove from Waiting Queue and add to Ready Queue
+    while (wq)
+    {
+        if(wq->job->arrivalTime <= currentTime){
+            QNode* node = wq->next;
+            wq->next=NULL;
+            if(prev){
+                prev->next=node;
+                if(temp) {
+                    temp->next = wq;
+                    temp=temp->next;
+                }
+                else {
+                    res.q = wq;
+                    temp=res.q;
+                }
+            }
+            else{
+                res.wq=node;
+                if(temp){
+                    temp->next = wq;
+                    temp=temp->next;
+                }
+                else {
+                    res.q = wq;
+                    temp=res.q;
+                }
+            }
+            wq=node;
+        }
+        else{
+            prev = wq;
+            wq = wq->next;
+        }
+    }
+    // printf("\n\n Transfer to Ready Queue End\n\n");
+    // printQueue(res.q);
+    // printQueue(res.wq);
+    return res;
+}
+
+RES transferToWaitingQueue(QNode *q, QNode *wq, QNode *node)
+{
+    RES res;
+    res.q = q;
+    res.wq = wq;
+    // printf("\n\n Transfer to Waiting Queue Begining\n\n");
+    // printQueue(res.q);
+    // printQueue(res.wq);
+    // Remove from Ready Queue and add to Waiting Queue
+    QNode *prev = NULL, *temp = q;
+    while (wq && wq->next)
+        wq = wq->next;
+    while (q)
+    {
+        if (q == node)
+        {
+            if (prev)
+            {
+                prev->next = node->next;
+                node->next = NULL;
+                if (res.wq)
+                    wq->next = node;
+                else
+                    res.wq = node;
+            }
+            else
+            {
+                res.q = node->next;
+                node->next = NULL;
+                if (res.wq)
+                    wq->next = node;
+                else
+                    res.wq = node;
+            }
+            break;
+        }
+        prev = q;
+        q = q->next;
+    }
+    // printf("\n\n Transfer to Waiting Queue End\n\n");
+    // printQueue(res.q);
+    // printQueue(res.wq);
+    return res;
+}
+
+RES executeJob(QNode *q, QNode *wq, QNode *node, int *currentTime, int timeSlice, int prevDecisionPoint)
+{
+    RES res;
+    res.q = q;
+    res.wq = wq;
     int execution = node->job->cpu[node->job->cpuIndex];
     if (execution <= timeSlice)
     {
         node->job->cpu[node->job->cpuIndex] = 0;
         node->job->cpuIndex++;
-        increaseGroupCount(q, node->job->gid, execution, *currentTime);
+        increaseGroupCount(q, node->job->gid, execution);
         *currentTime += execution;
-        if (node->job->cpuIndex == node->job->bursts)
-            q = deleteQueue(q, node);
+        if (node->job->cpuIndex == node->job->bursts){
+            q = deleteFromQueue(q, node);
+            res.q=q;
+        }
         else
         {
             node->job->arrivalTime = *currentTime + node->job->io[node->job->ioIndex];
@@ -67,13 +170,16 @@ QNode *executeJob(QNode *q, QNode *node, int *currentTime, int timeSlice, int pr
             node->job->cpuCount = 0;
             node->job->groupCount = 0;
             node->job->wentForIO = true;
+            res = transferToWaitingQueue(q, wq, node);
+            q = res.q;
+            wq = res.wq;
         }
     }
     else
     {
         execution = timeSlice;
         node->job->cpu[node->job->cpuIndex] -= timeSlice;
-        increaseGroupCount(q, node->job->gid, execution, *currentTime);
+        increaseGroupCount(q, node->job->gid, execution);
         *currentTime += execution;
         node->job->cpuCount += execution;
     }
@@ -85,11 +191,13 @@ QNode *executeJob(QNode *q, QNode *node, int *currentTime, int timeSlice, int pr
             calculatePriority(q, groups);
         q = q->next;
     }
-    return temp;
+    return res;
 }
 
 int findNextJob(QNode *q)
 {
+    // printf("FInding a job to execute\n");
+    // printQueue(q);
     int minTime = INT_MAX;
     while (q)
     {
@@ -113,12 +221,12 @@ void equateGroupCount(QNode *q, QNode *node)
     }
 }
 
-void groupCountFunction(QNode *q, int currentTime)
+void groupCountFunction(QNode *q)
 {
     QNode *temp = q;
     while (q)
     {
-        if (q->job->wentForIO && q->job->arrivalTime <= currentTime)
+        if (q->job->wentForIO)
         {
             // Find other process that hasn't gone for I/O and equate group count
             // Else it's group count is 0

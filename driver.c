@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
     }
     int n;
     fscanf(fp, "%d", &n);
-    QNode *q = NULL;
-    int totalExecutionTime = 0;
+    QNode *q = NULL, *wq = NULL; // q represents a Ready Queue
+    int totalExecutionTime = 0, currentTime = 0, prevDecisionPoint = 0;
     forn(0, n)
     {
         Job *job = (Job *)malloc(sizeof(Job));
@@ -49,35 +49,57 @@ int main(int argc, char *argv[])
         job->wentForIO = false;
         for (int i = 0; i < bursts; i++)
             fscanf(fp, "%d", &job->cpu[i]);
-        for (int i = 0; i < bursts; i++)
-            job->cpu[i] = (((rand() % (UPPER - LOWER + 1)) + LOWER) * job->cpu[i]) / 100;
+        // Comment for loop for checking worst case time
+        // for (int i = 0; i < bursts; i++)
+        //     job->cpu[i] = (((rand() % (UPPER - LOWER + 1)) + LOWER) * job->cpu[i]) / 100;
         for (int i = 0; i < bursts - 1; i++)
             fscanf(fp, "%d", &job->io[i]);
-        if (i == 0)
-            q = initQueue(job);
+        if (job->arrivalTime > currentTime)
+        {
+            if (wq)
+                insertInQueue(wq, job);
+            else
+                wq = initQueue(job);
+        }
         else
-            insertQueue(q, job);
+        {
+            if (q)
+                insertInQueue(q, job);
+            else
+                q = initQueue(job);
+        }
     }
     fclose(fp);
-    int time = 0, prevDecisionPoint = 0;
+    printf("Ready Queue:\n");
     printQueue(q);
-    while (q)
+    // The waiting queue keeps a track of processes that will join the ready queue at a later time.
+    printf("Waiting Queue:\n");
+    printQueue(wq);
+    while (q || wq)
     {
-        QNode *node = pickAJobToExecute(q, time);
+        QNode *node = pickAJobToExecute(q);
         if (node == NULL)
         {
-            int nextJobArrivalTime = findNextJob(q);
-            printf("Time %d: CPU idle\n", time);
-            time = nextJobArrivalTime;
+            int nextJobArrivalTime = findNextJob(wq);
+            printf("Time %d: CPU idle\n", currentTime);
+            currentTime = nextJobArrivalTime;
+            RES res = transferToReadyQueue(q, wq, currentTime);
+            q = res.q;
+            wq = res.wq;
         }
         else
         {
-            printf("Time %d: Job %d executing\n", time, node->job->jid);
-            q = executeJob(q, node, &time, timeSlice, prevDecisionPoint);
-            groupCountFunction(q, time);
+            printf("Time %d: Job %d executing\n", currentTime, node->job->jid);
+            RES res = executeJob(q, wq, node, &currentTime, timeSlice, prevDecisionPoint);
+            q = res.q;
+            wq = res.wq;
+            res = transferToReadyQueue(q, wq, currentTime);
+            q = res.q;
+            wq = res.wq;
+            groupCountFunction(q);
         }
-        prevDecisionPoint = time;
+        prevDecisionPoint = currentTime;
     }
-    printf("Time %d: Execution over\n", time);
+    printf("Time %d: Execution over\n", currentTime);
     return 0;
 }

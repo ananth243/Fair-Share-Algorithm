@@ -39,40 +39,51 @@ struct ReadyQueue
 
 typedef struct ReadyQueue QNode;
 
+/* This structure is used mainly for returning heads of ready queue and waiting queue if any
+modifications are made to them while transfering jobs between the two queues*/
+typedef struct
+{
+    QNode *q; QNode *wq;
+} RES;
+
 QNode *initQueue(Job *job);
 
-void insertQueue(QNode *head, Job *job);
+void insertInQueue(QNode *head, Job *job);
 
+// Utility function for debugging
 void printQueue(QNode *q);
 
 // Deletes a node "node" from the queue. Returns head of queue after deletion
-QNode *deleteQueue(QNode *head, QNode *node);
+QNode *deleteFromQueue(QNode *head, QNode *node);
 
 // Job executions
 
-// Function picks next job to execute
-QNode *pickAJobToExecute(QNode *q, int currentTime);
+// Picks next job to execute from ready queue
+QNode *pickAJobToExecute(QNode *q);
 
-// Returns head of queue after executing the job
-QNode *executeJob(QNode *q, QNode *node, int *currentTime, int timeSlice, int prevDecisionPoint);
+// Returns heads of ready queue and waiting after executing the job
+RES executeJob(QNode *q, QNode *wq, QNode *node, int *currentTime, int timeSlice, int prevDecisionPoint);
 
-// Calculates priorities for all processes after execution of a job
+// Transfers any jobs that have finished IO from waiting queue to ready queue after every decision point
+RES transferToReadyQueue(QNode* q, QNode* wq, int currentTime);
+
+// Calculates priorities for all processes in ready queue after execution of a job
 void calculatePriority(QNode *node, int groups);
 
-// Function finds next job to execute when CPU becomes idle and returns the arrival time of the next job
+// Finds next job to execute when CPU becomes idle and returns the arrival time of the next job
 int findNextJob(QNode *q);
 
-// Function increases group count of any newly arrived processes
-void increaseGroupCount(QNode *q, int gid, int execution, int currentTime);
+// Increases group count of all processes of same group after execution of a job in the same group
+void increaseGroupCount(QNode *q, int gid, int execution);
 
-// Function returns the number of groups present for execution for calculating priority
-int getNumberOfGroups(QNode *q, int currentTime);
+// Returns the number of groups present in ready queue for calculating priority
+int getNumberOfGroups(QNode *q, int prevDecisionPoint);
 
-// Function equates the group count of all members of the current executed process
+// Equates the group count of all group members in ready queue of the current executed process
 void equateGroupCount(QNode *q, QNode *node);
 
-// Function adds group count for any newly arrived processes
-void groupCountFunction(QNode *q, int currentTime);
+// Adds group count for any newly arrived processes
+void groupCountFunction(QNode *q);
 
 // Set declarations
 struct Group
