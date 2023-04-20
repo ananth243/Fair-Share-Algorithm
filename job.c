@@ -16,8 +16,6 @@ int getNumberOfGroups(QNode *q, int prevDecisionPoint)
 
 QNode *pickAJobToExecute(QNode *q)
 {
-    // printf("Picking  a job to execute\n");
-    // printQueue(q);
     QNode *ans = NULL;
     int priority = INT_MAX;
     while (q)
@@ -54,9 +52,6 @@ RES transferToReadyQueue(QNode *q, QNode *wq, int currentTime)
     RES res;
     res.wq = wq;
     res.q = q;
-    // printf("\n\n Transfer to Ready Queue start\n\n");
-    // printQueue(res.q);
-    // printQueue(res.wq);
     QNode *prev = NULL, *temp = q;
     while (temp && temp->next)
         temp = temp->next;
@@ -103,9 +98,6 @@ RES transferToReadyQueue(QNode *q, QNode *wq, int currentTime)
             wq = wq->next;
         }
     }
-    // printf("\n\n Transfer to Ready Queue End\n\n");
-    // printQueue(res.q);
-    // printQueue(res.wq);
     return res;
 }
 
@@ -114,9 +106,6 @@ RES transferToWaitingQueue(QNode *q, QNode *wq, QNode *node)
     RES res;
     res.q = q;
     res.wq = wq;
-    // printf("\n\n Transfer to Waiting Queue Begining\n\n");
-    // printQueue(res.q);
-    // printQueue(res.wq);
     // Remove from Ready Queue and add to Waiting Queue
     QNode *prev = NULL, *temp = q;
     while (wq && wq->next)
@@ -148,9 +137,6 @@ RES transferToWaitingQueue(QNode *q, QNode *wq, QNode *node)
         prev = q;
         q = q->next;
     }
-    // printf("\n\n Transfer to Waiting Queue End\n\n");
-    // printQueue(res.q);
-    // printQueue(res.wq);
     return res;
 }
 
@@ -174,7 +160,7 @@ RES executeJob(QNode *q, QNode *wq, QNode *node, int *currentTime, int timeSlice
         else
         {
             node->job->arrivalTime = *currentTime + node->job->io[node->job->ioIndex];
-            printf("Time %d: Job %d gone for I/O. Will be back at %d\n", *currentTime, node->job->jid, node->job->arrivalTime);
+            printf("[%d]: Job %d gone for I/O. Will be back at %d\n", *currentTime, node->job->jid, node->job->arrivalTime);
             node->job->calculatedPriority = node->job->basePriority;
             node->job->ioIndex++;
             node->job->cpuCount = 0;
@@ -206,8 +192,6 @@ RES executeJob(QNode *q, QNode *wq, QNode *node, int *currentTime, int timeSlice
 
 int findNextJob(QNode *q)
 {
-    // printf("FInding a job to execute\n");
-    // printQueue(q);
     int minTime = INT_MAX;
     while (q)
     {

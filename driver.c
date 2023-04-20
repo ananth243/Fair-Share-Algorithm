@@ -75,17 +75,13 @@ int main(int argc, char *argv[])
         }
     }
     fclose(fp);
-    printf("Ready Queue:\n");
-    printQueue(q);
-    printf("Waiting Queue:\n");
-    printQueue(wq);
     while (q || wq)
     {
         QNode *node = pickAJobToExecute(q);
         if (node == NULL)
         {
             int nextJobArrivalTime = findNextJob(wq);
-            printf("Time %d: CPU idle\n", currentTime);
+            printf("[%d]: CPU idle\n", currentTime);
             currentTime = nextJobArrivalTime;
             RES res = transferToReadyQueue(q, wq, currentTime);
             q = res.q;
@@ -93,7 +89,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            printf("Time %d: Job %d executing\n", currentTime, node->job->jid);
+            printf("[%d]: Job %d executing\n", currentTime, node->job->jid);
             RES res = executeJob(q, wq, node, &currentTime, timeSlice, prevDecisionPoint);
             q = res.q;
             wq = res.wq;
@@ -104,6 +100,6 @@ int main(int argc, char *argv[])
         }
         prevDecisionPoint = currentTime;
     }
-    printf("Time %d: Execution over\n", currentTime);
+    printf("[%d]: Execution over\n", currentTime);
     return 0;
 }
