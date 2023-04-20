@@ -22,7 +22,7 @@ void printQueue(QNode *q)
 {
     while (q)
     {
-        printf("Job %d, Group ID: %d, Arrival Time: %d, Priority: %d\n", q->job->jid, q->job->gid, q->job->arrivalTime,q->job->calculatedPriority);
+        printf("Job %d, Group ID: %d, Arrival Time: %d, Priority: %d\n", q->job->jid, q->job->gid, q->job->arrivalTime, q->job->calculatedPriority);
         printf("Actual CPU bursts: ");
         for (int i = 0; i < q->job->bursts; i++)
             printf("%d ", q->job->cpu[i]);

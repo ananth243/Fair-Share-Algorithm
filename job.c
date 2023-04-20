@@ -5,7 +5,8 @@ int getNumberOfGroups(QNode *q, int prevDecisionPoint)
     Set *set = initSet();
     while (q)
     {
-        if(q->job->arrivalTime <= prevDecisionPoint) insertInSet(set, q->job->gid);
+        if (q->job->arrivalTime <= prevDecisionPoint)
+            insertInSet(set, q->job->gid);
         q = q->next;
     }
     int ans = set->size;
@@ -62,34 +63,42 @@ RES transferToReadyQueue(QNode *q, QNode *wq, int currentTime)
     // Remove from Waiting Queue and add to Ready Queue
     while (wq)
     {
-        if(wq->job->arrivalTime <= currentTime){
-            QNode* node = wq->next;
-            wq->next=NULL;
-            if(prev){
-                prev->next=node;
-                if(temp) {
+        if (wq->job->arrivalTime <= currentTime)
+        {
+            QNode *node = wq->next;
+            wq->next = NULL;
+            if (prev)
+            {
+                prev->next = node;
+                if (temp)
+                {
                     temp->next = wq;
-                    temp=temp->next;
+                    temp = temp->next;
                 }
-                else {
+                else
+                {
                     res.q = wq;
-                    temp=res.q;
+                    temp = res.q;
                 }
             }
-            else{
-                res.wq=node;
-                if(temp){
+            else
+            {
+                res.wq = node;
+                if (temp)
+                {
                     temp->next = wq;
-                    temp=temp->next;
+                    temp = temp->next;
                 }
-                else {
+                else
+                {
                     res.q = wq;
-                    temp=res.q;
+                    temp = res.q;
                 }
             }
-            wq=node;
+            wq = node;
         }
-        else{
+        else
+        {
             prev = wq;
             wq = wq->next;
         }
@@ -157,9 +166,10 @@ RES executeJob(QNode *q, QNode *wq, QNode *node, int *currentTime, int timeSlice
         node->job->cpuIndex++;
         increaseGroupCount(q, node->job->gid, execution);
         *currentTime += execution;
-        if (node->job->cpuIndex == node->job->bursts){
+        if (node->job->cpuIndex == node->job->bursts)
+        {
             q = deleteFromQueue(q, node);
-            res.q=q;
+            res.q = q;
         }
         else
         {

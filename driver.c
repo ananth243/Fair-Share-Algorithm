@@ -27,7 +27,12 @@ int main(int argc, char *argv[])
     }
     int n;
     fscanf(fp, "%d", &n);
-    QNode *q = NULL, *wq = NULL; // q represents a Ready Queue
+    /*
+    q represents the Ready Queue
+    wq represents a queue for all processes that are to join the Ready Queue
+    The waiting queue keeps a track of processes that will join the ready queue at a later time.
+    */
+    QNode *q = NULL, *wq = NULL;
     int totalExecutionTime = 0, currentTime = 0, prevDecisionPoint = 0;
     forn(0, n)
     {
@@ -50,8 +55,8 @@ int main(int argc, char *argv[])
         for (int i = 0; i < bursts; i++)
             fscanf(fp, "%d", &job->cpu[i]);
         // Comment for loop for checking worst case time
-        // for (int i = 0; i < bursts; i++)
-        //     job->cpu[i] = (((rand() % (UPPER - LOWER + 1)) + LOWER) * job->cpu[i]) / 100;
+        for (int i = 0; i < bursts; i++)
+            job->cpu[i] = (((rand() % (UPPER - LOWER + 1)) + LOWER) * job->cpu[i]) / 100;
         for (int i = 0; i < bursts - 1; i++)
             fscanf(fp, "%d", &job->io[i]);
         if (job->arrivalTime > currentTime)
@@ -72,7 +77,6 @@ int main(int argc, char *argv[])
     fclose(fp);
     printf("Ready Queue:\n");
     printQueue(q);
-    // The waiting queue keeps a track of processes that will join the ready queue at a later time.
     printf("Waiting Queue:\n");
     printQueue(wq);
     while (q || wq)
