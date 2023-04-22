@@ -77,6 +77,10 @@ int main(int argc, char *argv[])
     fclose(fp);
     while (q || wq)
     {
+        printf("Ready Queue:\n\n");
+        printQueue(q);
+        printf("Waiting Queue:\n\n");
+        printQueue(wq);
         QNode *node = pickAJobToExecute(q);
         if (node == NULL)
         {
